@@ -18106,7 +18106,7 @@ ${cnExample}`);
       },
       raw: "",
       toParagraphs: [
-        cnAllExplanation.join(",")
+        cnAllExplanation.join("\n")
       ]
     };
     completion({

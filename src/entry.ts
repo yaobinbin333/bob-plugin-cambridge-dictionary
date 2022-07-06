@@ -216,7 +216,7 @@ const main = (file: any, completion) => {
             },
             raw: '',
             toParagraphs: [
-                cnAllExplanation.join(',')
+                cnAllExplanation.join('\n')
             ],
         }
         completion({
