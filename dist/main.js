@@ -17907,7 +17907,7 @@ var { merge: merge2 } = static_exports;
 var { parseHTML: parseHTML2 } = static_exports;
 var { root: root2 } = static_exports;
 
-// src/test.ts
+// src/entry.ts
 var baseUrl = "https://dictionary.cambridge.org";
 var otherLang = [
   "af",
@@ -18006,10 +18006,10 @@ var otherLang = [
 var items = [["zh-Hans", "zh"], ["zh-Hant", "zh-Hant"], ...otherLang];
 var langMap = new Map(items);
 function translate(query, completion) {
-  if (!query.text || query.text.split(" ").length > 1) {
+  if (query.detectFrom !== "en" || !query.text || query.text.split(" ").length > 1) {
     completion({
       result: {
-        toParagraphs: [query.text, "\u672C\u8BCD\u5178\u4E0D\u652F\u6301\u591A\u5355\u8BCD\u7FFB\u8BD1"],
+        toParagraphs: [query.text, "\u672C\u8BCD\u5178\u53EA\u652F\u6301\u82F1\u8BED\u5355\u8BCD\u7FFB\u8BD1"],
         raw: ""
       }
     });
@@ -18019,7 +18019,6 @@ function translate(query, completion) {
     url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${query.text}`,
     handler: (res) => {
       main(res.data, completion);
-      api.$log.info(`res: ${res.data}`);
       if (res.error) {
         api.$log.error(`reserr: ${Object.keys(res)}`);
       }
@@ -18037,6 +18036,7 @@ var main = (file, completion) => {
   };
   const $2 = load(file);
   const word = $2(".headword .dhw").text();
+  const hasWord = $2(".headword .dhw").html();
   api.$log.info(`word: ${word}`);
   let phonetics = [];
   const makePhonetic = ($textEl, $audioEl, type) => {
@@ -18052,7 +18052,15 @@ var main = (file, completion) => {
     };
   };
   let cnAllExplanation = [];
-  if (word) {
+  const transformToAdditions = (parts) => {
+    return parts.map((part) => {
+      return {
+        name: part.part,
+        value: part.means.join(";")
+      };
+    });
+  };
+  if (hasWord) {
     phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
     api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
     const parts = [];
@@ -18094,7 +18102,7 @@ ${cnExample}`);
       ],
       toDict: {
         phonetics,
-        parts
+        additions: transformToAdditions(parts)
       },
       raw: "",
       toParagraphs: [
@@ -18105,6 +18113,13 @@ ${cnExample}`);
       result: res
     });
     api.$log.info(`res${res}`);
+  } else {
+    completion({
+      result: {
+        toParagraphs: [`\u8BCD\u5178\u5185\u6CA1\u6709\u627E\u5230${word}\uFF0C\u8BF7\u67E5\u770B\u5176\u4ED6\u8BCD\u5178\uFF5E`],
+        raw: ""
+      }
+    });
   }
 };
 var cache = new Cache();

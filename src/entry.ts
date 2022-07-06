@@ -1,6 +1,6 @@
 import * as Bob from "@bob-plug/core";
 import { load, Cheerio, AnyNode } from 'cheerio';
-import { Phonetic } from './helper/types';
+import { Part, Phonetic } from './helper/types';
 
 const baseUrl = 'https://dictionary.cambridge.org';
 const otherLang: Array<[string, string]> = [
@@ -112,10 +112,10 @@ const langMap = new Map(items);
  */
 function translate(query, completion) {
     // 多单词不翻译
-    if (!query.text || query.text.split(" ").length > 1) {
+    if (query.detectFrom !== 'en' || !query.text || query.text.split(" ").length > 1) {
         completion({
             result: {
-                toParagraphs: [query.text, '本词典不支持多单词翻译'],
+                toParagraphs: [query.text, '本词典只支持英语单词翻译'],
                 raw: ''
             }
         });
@@ -125,7 +125,6 @@ function translate(query, completion) {
         url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${query.text}`,
         handler: (res) => {
             main(res.data, completion);
-            Bob.api.$log.info(`res: ${res.data}`);
             if (res.error) {
                 Bob.api.$log.error(`reserr: ${Object.keys(res)}`);
             }
@@ -144,6 +143,7 @@ const main = (file: any, completion) => {
       }
     const $ = load(file);
     const word = $('.headword .dhw').text();
+    const hasWord = $('.headword .dhw').html();
     Bob.api.$log.info(`word: ${word}`);
     let phonetics: Phonetic[] = []
     const makePhonetic = ($textEl: Cheerio<AnyNode>, $audioEl: Cheerio<AnyNode>, type: string): Phonetic => {
@@ -159,7 +159,16 @@ const main = (file: any, completion) => {
         }
     }
     let cnAllExplanation: string[] = [];
-    if (word) {
+    // transform parts to additions
+    const transformToAdditions = (parts: Part[]) => {
+        return parts.map(part => {
+            return {
+                name: part.part,
+                value: part.means.join(';')
+            }
+        })
+    }
+    if (hasWord) {
         phonetics = [makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk'), makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us')];
         // 英文释义、中文释义、例句
         Bob.api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
@@ -203,18 +212,25 @@ const main = (file: any, completion) => {
             ],
             toDict: {
                 phonetics,
-                parts,
+                additions: transformToAdditions(parts)
             },
             raw: '',
             toParagraphs: [
                 cnAllExplanation.join(',')
-            ]
+            ],
         }
         completion({
             result: res
         });
         Bob.api.$log.info(`res${res}`);
 
+    }else {
+        completion({
+            result: {
+                toParagraphs: [`词典内没有找到${word}，请查看其他词典～`],
+                raw: ''
+            }
+        });
     }
 }
 const cache = new Bob.Cache();
