@@ -1,0 +1,12 @@
+{
+    "identifier": "com.maybelab.volc",
+    "versions": [
+      {
+        "version": "1.0.0",
+        "desc": "更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases",
+        "sha256": "d507f7f51c5d361e59d22a6950210b61d7242ec29f6dfa52cf0dc011b1fdf771",
+        "url": "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/dist/bob-plugin-cambridge-dictionary-1.0.0.zip",
+        "minBobVersion": "0.8.0"
+      }
+    ]
+  }
