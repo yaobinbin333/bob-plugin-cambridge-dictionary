@@ -1,0 +1,26 @@
+{
+  "name": "cambridge-dictionary",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "yaobinbin333",
+  "license": "ISC",
+  "dependencies": {
+    "@bob-plug/core": "^0.1.4",
+    "axios": "^0.27.2",
+    "crypto-js": "^4.1.1",
+    "debug": "^4.3.4",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "adm-zip": "^0.5.9",
+    "esbuild": "^0.14.48"
+  },
+  "optionalDependencies": {
+    "@volcengine/openapi": "^1.1.2"
+  }
+}
