@@ -18057,7 +18057,7 @@ var main = (file, completion) => {
       } : void 0
     };
   };
-  let cnAllExplanation = [];
+  let cnAllExplanation = ["\u6240\u6709\u7FFB\u8BD1:"];
   if (hasWord) {
     phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
     api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
@@ -18072,7 +18072,7 @@ var main = (file, completion) => {
           const cnExplanation = $2(".ddef_b", element2).children().first().text();
           pushPart(parts, `${curPartSpeech}-\u82F1\u6587\u91CA\u4E49`, enExplanation);
           pushPart(parts, `${curPartSpeech}-\u4E2D\u6587\u91CA\u4E49`, cnExplanation);
-          cnAllExplanation.push(cnExplanation);
+          cnAllExplanation.push(`${curPartSpeech}: ${cnExplanation}`);
           let exampleCnt = 0;
           let shouldPushEg = true;
           $2(".examp", element2).each((index4, element3) => {

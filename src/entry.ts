@@ -162,7 +162,7 @@ const main = (file: any, completion) => {
             } : undefined
         }
     }
-    let cnAllExplanation: string[] = [];
+    let cnAllExplanation: string[] = ['所有翻译:'];
     // transform parts to additions
 
     if (hasWord) {
@@ -174,7 +174,7 @@ const main = (file: any, completion) => {
         const explanationCnt = $('.entry-body__el').length;
         console.log('explanationCnt', explanationCnt);
         $('.entry-body__el').each((i, el) => {
-            // 词性：名词、形容词等
+            // 词性：名词、形容词等，anc-info-head为短语的时候词性classname
             const curPartSpeech = $('.posgram', el).text() || $('.anc-info-head', el).text();
             $('.dsense', el).each((index, element) => {
                 const dBlock = $('.def-block', element).each((index, element) => {
@@ -182,7 +182,7 @@ const main = (file: any, completion) => {
                     const cnExplanation = $('.ddef_b', element).children().first().text();
                     pushPart(parts, `${curPartSpeech}-英文释义`, enExplanation);
                     pushPart(parts, `${curPartSpeech}-中文释义`, cnExplanation);
-                    cnAllExplanation.push(cnExplanation);
+                    cnAllExplanation.push(`${curPartSpeech}: ${cnExplanation}`);
                     let exampleCnt = 0;
                     let shouldPushEg = true;
                     $('.examp', element).each((index, element) => {
