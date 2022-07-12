@@ -4,7 +4,7 @@
       {
         "version": "1.0.1",
         "desc": "更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases",
-        "sha256": "7a781fbbfe50e5142e23ad3b5aecf6387843c36ebc242ae3dde51cfa9a6e7111",
+        "sha256": "ea75ddf0329eec361221f8093cd22a25bb475ccbcabee76614a08568e8cf70c9",
         "url": "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/dist/bob-plugin-cambridge-dictionary-1.0.0.zip",
         "minBobVersion": "0.8.0"
       }
