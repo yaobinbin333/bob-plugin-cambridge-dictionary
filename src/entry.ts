@@ -128,6 +128,7 @@ function translate(query, completion) {
         }
     });
 }
+// transform parts to additions
 const transformToAdditions = (parts: Part[]) => {
     return parts.map(part => {
         return {
@@ -163,7 +164,6 @@ const main = (file: any, completion) => {
         }
     }
     let cnAllExplanation: string[] = ['所有翻译:'];
-    // transform parts to additions
 
     if (hasWord) {
         phonetics = [makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk'), makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us')];
