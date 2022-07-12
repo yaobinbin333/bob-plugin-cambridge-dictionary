@@ -18006,17 +18006,15 @@ var otherLang = [
 var items = [["zh-Hans", "zh"], ["zh-Hant", "zh-Hant"], ...otherLang];
 var langMap = new Map(items);
 function translate(query, completion) {
-  if (query.detectFrom !== "en" || !query.text || query.text.split(" ").length > 1) {
+  if (query.detectFrom !== "en" || !query.text || query.text.split(" ").length > 3) {
     completion({
-      result: {
-        toParagraphs: [query.text, "\u672C\u8BCD\u5178\u53EA\u652F\u6301\u82F1\u8BED\u5355\u8BCD\u7FFB\u8BD1"],
-        raw: ""
-      }
+      error: "\u672C\u8BCD\u5178\u53EA\u652F\u6301\u82F1\u8BED\u5355\u8BCD\u7FFB\u8BD1"
     });
     return;
   }
+  let text3 = query.text.split(" ").join("-");
   api.$http.get({
-    url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${query.text}`,
+    url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${text3}`,
     handler: (res) => {
       main(res.data, completion);
       if (res.error) {
@@ -18025,6 +18023,14 @@ function translate(query, completion) {
     }
   });
 }
+var transformToAdditions = (parts) => {
+  return parts.map((part) => {
+    return {
+      name: part.part,
+      value: part.means.join(";")
+    };
+  });
+};
 var main = (file, completion) => {
   const pushPart = (parts, part, ...means) => {
     if (means) {
@@ -18036,7 +18042,7 @@ var main = (file, completion) => {
   };
   const $2 = load(file);
   const word = $2(".headword .dhw").text();
-  const hasWord = $2(".headword .dhw").html();
+  const hasWord = $2(".headword").html();
   api.$log.info(`word: ${word}`);
   let phonetics = [];
   const makePhonetic = ($textEl, $audioEl, type) => {
@@ -18052,14 +18058,6 @@ var main = (file, completion) => {
     };
   };
   let cnAllExplanation = [];
-  const transformToAdditions = (parts) => {
-    return parts.map((part) => {
-      return {
-        name: part.part,
-        value: part.means.join(";")
-      };
-    });
-  };
   if (hasWord) {
     phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
     api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
@@ -18067,13 +18065,13 @@ var main = (file, completion) => {
     const explanationCnt = $2(".entry-body__el").length;
     console.log("explanationCnt", explanationCnt);
     $2(".entry-body__el").each((i, el) => {
-      const curPartSpeech = $2(".posgram", el).text();
+      const curPartSpeech = $2(".posgram", el).text() || $2(".anc-info-head", el).text();
       $2(".dsense", el).each((index2, element) => {
         const dBlock = $2(".def-block", element).each((index3, element2) => {
           const enExplanation = $2(".ddef_h", element2).text();
           const cnExplanation = $2(".ddef_b", element2).children().first().text();
-          pushPart(parts, `${curPartSpeech}-en`, enExplanation);
-          pushPart(parts, `${curPartSpeech}-cn`, cnExplanation);
+          pushPart(parts, `${curPartSpeech}-\u82F1\u6587\u91CA\u4E49`, enExplanation);
+          pushPart(parts, `${curPartSpeech}-\u4E2D\u6587\u91CA\u4E49`, cnExplanation);
           cnAllExplanation.push(cnExplanation);
           let exampleCnt = 0;
           let shouldPushEg = true;
@@ -18106,7 +18104,7 @@ ${cnExample}`);
       },
       raw: "",
       toParagraphs: [
-        cnAllExplanation.join("\n")
+        cnAllExplanation.join("\r")
       ]
     };
     completion({
@@ -18115,10 +18113,7 @@ ${cnExample}`);
     api.$log.info(`res${res}`);
   } else {
     completion({
-      result: {
-        toParagraphs: [`\u8BCD\u5178\u5185\u6CA1\u6709\u627E\u5230${word}\uFF0C\u8BF7\u67E5\u770B\u5176\u4ED6\u8BCD\u5178\uFF5E`],
-        raw: ""
-      }
+      error: `\u8BCD\u5178\u5185\u6CA1\u6709\u627E\u5230${word}\uFF0C\u8BF7\u67E5\u770B\u5176\u4ED6\u8BCD\u5178\uFF5E`
     });
   }
 };
@@ -18152,7 +18147,7 @@ function supportLanguages() {
   } else if (cache.get(INSTALL) !== api.$info.version) {
     buryPoint("plugin-updated");
   }
-  return Array.from(new Set(langMap.keys()));
+  return ["zh-Hans", "en"];
 }
 /** @preserve
 	(c) 2012 by Cédric Mesnil. All rights reserved.

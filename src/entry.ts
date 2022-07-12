@@ -111,18 +111,15 @@ const langMap = new Map(items);
  * @param {*} completion
  */
 function translate(query, completion) {
-    // 多单词不翻译
-    if (query.detectFrom !== 'en' || !query.text || query.text.split(" ").length > 1) {
+    if (query.detectFrom !== 'en' || !query.text || query.text.split(" ").length > 3) {
         completion({
-            result: {
-                toParagraphs: [query.text, '本词典只支持英语单词翻译'],
-                raw: ''
-            }
+            error: '本词典只支持英语单词翻译'
         });
         return;
     }
+    let text = query.text.split(" ").join("-");
     Bob.api.$http.get({
-        url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${query.text}`,
+        url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${text}`,
         handler: (res) => {
             main(res.data, completion);
             if (res.error) {
@@ -131,7 +128,14 @@ function translate(query, completion) {
         }
     });
 }
-
+const transformToAdditions = (parts: Part[]) => {
+    return parts.map(part => {
+        return {
+            name: part.part,
+            value: part.means.join(';')
+        }
+    })
+}
 const main = (file: any, completion) => {
     const pushPart = (parts, part, ...means) => {
         if (means) {
@@ -143,7 +147,7 @@ const main = (file: any, completion) => {
       }
     const $ = load(file);
     const word = $('.headword .dhw').text();
-    const hasWord = $('.headword .dhw').html();
+    const hasWord = $('.headword').html();
     Bob.api.$log.info(`word: ${word}`);
     let phonetics: Phonetic[] = []
     const makePhonetic = ($textEl: Cheerio<AnyNode>, $audioEl: Cheerio<AnyNode>, type: string): Phonetic => {
@@ -160,14 +164,7 @@ const main = (file: any, completion) => {
     }
     let cnAllExplanation: string[] = [];
     // transform parts to additions
-    const transformToAdditions = (parts: Part[]) => {
-        return parts.map(part => {
-            return {
-                name: part.part,
-                value: part.means.join(';')
-            }
-        })
-    }
+
     if (hasWord) {
         phonetics = [makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk'), makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us')];
         // 英文释义、中文释义、例句
@@ -178,13 +175,13 @@ const main = (file: any, completion) => {
         console.log('explanationCnt', explanationCnt);
         $('.entry-body__el').each((i, el) => {
             // 词性：名词、形容词等
-            const curPartSpeech = $('.posgram', el).text();
+            const curPartSpeech = $('.posgram', el).text() || $('.anc-info-head', el).text();
             $('.dsense', el).each((index, element) => {
                 const dBlock = $('.def-block', element).each((index, element) => {
                     const enExplanation = $('.ddef_h', element).text();
                     const cnExplanation = $('.ddef_b', element).children().first().text();
-                    pushPart(parts, `${curPartSpeech}-en`, enExplanation);
-                    pushPart(parts, `${curPartSpeech}-cn`, cnExplanation);
+                    pushPart(parts, `${curPartSpeech}-英文释义`, enExplanation);
+                    pushPart(parts, `${curPartSpeech}-中文释义`, cnExplanation);
                     cnAllExplanation.push(cnExplanation);
                     let exampleCnt = 0;
                     let shouldPushEg = true;
@@ -216,7 +213,7 @@ const main = (file: any, completion) => {
             },
             raw: '',
             toParagraphs: [
-                cnAllExplanation.join('\n')
+                cnAllExplanation.join('\r')
             ],
         }
         completion({
@@ -226,10 +223,7 @@ const main = (file: any, completion) => {
 
     }else {
         completion({
-            result: {
-                toParagraphs: [`词典内没有找到${word}，请查看其他词典～`],
-                raw: ''
-            }
+            error: `词典内没有找到${word}，请查看其他词典～`
         });
     }
 }
@@ -269,5 +263,5 @@ function supportLanguages() {
         // 更新版本或安装了最初版本，标识为 true
         buryPoint("plugin-updated");
     }
-    return Array.from(new Set(langMap.keys()));
+    return ['zh-Hans','en'];
 }
