@@ -16,7 +16,7 @@ const INFO_JSON = {
   author: "yaobinbin333",
   homepage: "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary",
   minBobVersion: "0.8.0",
-  appcast: "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/appcast.json",
+  appcast: "https://cdn.jsdelivr.net/gh/yaobinbin333/bob-plugin-cambridge-dictionary@main/appcast.json",
 };
 
 const isRelease = process.argv.includes("--release");
