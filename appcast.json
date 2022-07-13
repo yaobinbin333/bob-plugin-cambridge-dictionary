@@ -1,12 +1,19 @@
 {
-    "identifier": "bob-plugin-cambridge-dictionary",
-    "versions": [
-      {
-        "version": "1.0.1",
-        "desc": "更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases",
-        "sha256": "ea75ddf0329eec361221f8093cd22a25bb475ccbcabee76614a08568e8cf70c9",
-        "url": "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/dist/bob-plugin-cambridge-dictionary-1.0.0.zip",
-        "minBobVersion": "0.8.0"
-      }
-    ]
-  }
+  "identifier": "bob-plugin-cambridge-dictionary",
+  "versions": [
+    {
+      "version": "1.0.1",
+      "desc": "更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases",
+      "sha256": "ea75ddf0329eec361221f8093cd22a25bb475ccbcabee76614a08568e8cf70c9",
+      "url": "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/dist/bob-plugin-cambridge-dictionary-1.0.0.zip",
+      "minBobVersion": "0.8.0"
+    },
+    {
+      "version": "1.0.2",
+      "desc": "更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases",
+      "sha256": "483add60e0ef3f45c946c163058422d4afbc44975f405c8c9e4aa7eff2827e2f",
+      "url": "https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/dist/bob-plugin-cambridge-dictionary1.0.2.bobplugin",
+      "minBobVersion": "0.8.0"
+    }
+  ]
+}

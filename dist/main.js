@@ -17909,6 +17909,142 @@ var { root: root2 } = static_exports;
 
 // src/entry.ts
 var baseUrl = "https://dictionary.cambridge.org";
+function translate(query, completion) {
+  if (query.detectFrom !== "en" || !query.text || query.text.split(" ").length > 3) {
+    completion({
+      error: "\u672C\u8BCD\u5178\u53EA\u652F\u6301\u82F1\u8BED\u5355\u8BCD\u7FFB\u8BD1"
+    });
+    return;
+  }
+  let text3 = query.text.split(" ").join("-");
+  api.$http.get({
+    url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${text3}`,
+    handler: (res) => {
+      main(res.data, completion);
+      if (res.error) {
+        api.$log.error(`reserr: ${Object.keys(res)}`);
+      }
+    }
+  });
+}
+var main = (file, completion) => {
+  const pushPart = (parts, part, ...means) => {
+    if (means) {
+      parts.push({
+        part: part.trim(),
+        means: means.map((mean) => mean.trim())
+      });
+    }
+  };
+  const $2 = load(file);
+  const word = $2(".headword .dhw").text();
+  const hasWord = $2(".headword").html();
+  api.$log.info(`word: ${word}`);
+  let phonetics = [];
+  let cnAllExplanation = ["\u6240\u6709\u7FFB\u8BD1:"];
+  if (hasWord) {
+    phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
+    api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
+    const parts = [];
+    const explanationCnt = $2(".entry-body__el").length;
+    console.log("explanationCnt", explanationCnt);
+    $2(".entry-body__el").each((i, el) => {
+      const curPartSpeech = $2(".posgram", el).text() || $2(".anc-info-head", el).text();
+      $2(".dsense", el).each((index2, element) => {
+        const dBlock = $2(".def-block", element).each((index3, element2) => {
+          const enExplanation = $2(".ddef_h", element2).text();
+          const cnExplanation = $2(".ddef_b", element2).children().first().text();
+          pushPart(parts, `${curPartSpeech}-\u82F1\u6587\u91CA\u4E49`, enExplanation);
+          pushPart(parts, `${curPartSpeech}-\u4E2D\u6587\u91CA\u4E49`, cnExplanation);
+          cnAllExplanation.push(`${curPartSpeech}: ${cnExplanation}`);
+          let exampleCnt = 0;
+          let shouldPushEg = true;
+          $2(".examp", element2).each((index4, element3) => {
+            const enExample = $2(".eg", element3).text();
+            const cnExample = $2(".eg", element3).next().text();
+            if (shouldPushEg) {
+              pushPart(parts, `\u4F8B\u53E5${index4 + 1}`, `${enExample}
+${cnExample}`);
+            }
+            exampleCnt++;
+            if (explanationCnt > 1 && exampleCnt >= 1) {
+              shouldPushEg = false;
+            }
+          });
+          shouldPushEg = true;
+        });
+      });
+    });
+    api.$log.info(`parts${parts}`);
+    const res = {
+      from: "en",
+      to: "zh-Hans",
+      fromParagraphs: [
+        word
+      ],
+      toDict: {
+        phonetics,
+        additions: transformToAdditions(parts)
+      },
+      raw: "",
+      toParagraphs: [
+        cnAllExplanation.join("\r")
+      ]
+    };
+    completion({
+      result: res
+    });
+    api.$log.info(`res${res}`);
+  } else {
+    completion({
+      error: `\u8BCD\u5178\u5185\u6CA1\u6709\u627E\u5230${word}\uFF0C\u8BF7\u67E5\u770B\u5176\u4ED6\u8BCD\u5178\uFF5E`
+    });
+  }
+};
+var cache = new Cache();
+var INSTALL = "__INSTALLED";
+var transformToAdditions = (parts) => {
+  return parts.map((part) => {
+    return {
+      name: part.part,
+      value: part.means.join(";")
+    };
+  });
+};
+var makePhonetic = ($textEl, $audioEl, type) => {
+  const value = $textEl.first().text() ?? "";
+  const audio = $audioEl.attr("src");
+  return {
+    type,
+    value,
+    tts: audio ? {
+      type: "url",
+      value: `${baseUrl}${audio}`
+    } : void 0
+  };
+};
+var buryPoint = (eventName) => {
+  api.$http.post({
+    url: "https://api.mixpanel.com/track?verbose=1&%69%70=1",
+    header: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: {
+      data: JSON.stringify([
+        {
+          event: eventName,
+          properties: {
+            token: "756388d6385bd7d3b849b18e4016c84a",
+            identifier: api.$info.identifier,
+            version: api.$info.version
+          }
+        }
+      ])
+    }
+  }).finally(() => {
+    cache.set(INSTALL, api.$info.version);
+  });
+};
 var otherLang = [
   "af",
   "ar",
@@ -18005,142 +18141,6 @@ var otherLang = [
 ].map((e) => [e, e]);
 var items = [["zh-Hans", "zh"], ["zh-Hant", "zh-Hant"], ...otherLang];
 var langMap = new Map(items);
-function translate(query, completion) {
-  if (query.detectFrom !== "en" || !query.text || query.text.split(" ").length > 3) {
-    completion({
-      error: "\u672C\u8BCD\u5178\u53EA\u652F\u6301\u82F1\u8BED\u5355\u8BCD\u7FFB\u8BD1"
-    });
-    return;
-  }
-  let text3 = query.text.split(" ").join("-");
-  api.$http.get({
-    url: `https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD-%E6%B1%89%E8%AF%AD-%E7%AE%80%E4%BD%93/${text3}`,
-    handler: (res) => {
-      main(res.data, completion);
-      if (res.error) {
-        api.$log.error(`reserr: ${Object.keys(res)}`);
-      }
-    }
-  });
-}
-var transformToAdditions = (parts) => {
-  return parts.map((part) => {
-    return {
-      name: part.part,
-      value: part.means.join(";")
-    };
-  });
-};
-var main = (file, completion) => {
-  const pushPart = (parts, part, ...means) => {
-    if (means) {
-      parts.push({
-        part: part.trim(),
-        means: means.map((mean) => mean.trim())
-      });
-    }
-  };
-  const $2 = load(file);
-  const word = $2(".headword .dhw").text();
-  const hasWord = $2(".headword").html();
-  api.$log.info(`word: ${word}`);
-  let phonetics = [];
-  const makePhonetic = ($textEl, $audioEl, type) => {
-    const value = $textEl.first().text() ?? "";
-    const audio = $audioEl.attr("src");
-    return {
-      type,
-      value,
-      tts: audio ? {
-        type: "url",
-        value: `${baseUrl}${audio}`
-      } : void 0
-    };
-  };
-  let cnAllExplanation = ["\u6240\u6709\u7FFB\u8BD1:"];
-  if (hasWord) {
-    phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
-    api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
-    const parts = [];
-    const explanationCnt = $2(".entry-body__el").length;
-    console.log("explanationCnt", explanationCnt);
-    $2(".entry-body__el").each((i, el) => {
-      const curPartSpeech = $2(".posgram", el).text() || $2(".anc-info-head", el).text();
-      $2(".dsense", el).each((index2, element) => {
-        const dBlock = $2(".def-block", element).each((index3, element2) => {
-          const enExplanation = $2(".ddef_h", element2).text();
-          const cnExplanation = $2(".ddef_b", element2).children().first().text();
-          pushPart(parts, `${curPartSpeech}-\u82F1\u6587\u91CA\u4E49`, enExplanation);
-          pushPart(parts, `${curPartSpeech}-\u4E2D\u6587\u91CA\u4E49`, cnExplanation);
-          cnAllExplanation.push(`${curPartSpeech}: ${cnExplanation}`);
-          let exampleCnt = 0;
-          let shouldPushEg = true;
-          $2(".examp", element2).each((index4, element3) => {
-            const enExample = $2(".eg", element3).text();
-            const cnExample = $2(".eg", element3).next().text();
-            if (shouldPushEg) {
-              pushPart(parts, `\u4F8B\u53E5${index4 + 1}`, `${enExample}
-${cnExample}`);
-            }
-            exampleCnt++;
-            if (explanationCnt > 1 && exampleCnt >= 1) {
-              shouldPushEg = false;
-            }
-          });
-          shouldPushEg = true;
-        });
-      });
-    });
-    api.$log.info(`parts${parts}`);
-    const res = {
-      from: "en",
-      to: "zh-Hans",
-      fromParagraphs: [
-        word
-      ],
-      toDict: {
-        phonetics,
-        additions: transformToAdditions(parts)
-      },
-      raw: "",
-      toParagraphs: [
-        cnAllExplanation.join("\r")
-      ]
-    };
-    completion({
-      result: res
-    });
-    api.$log.info(`res${res}`);
-  } else {
-    completion({
-      error: `\u8BCD\u5178\u5185\u6CA1\u6709\u627E\u5230${word}\uFF0C\u8BF7\u67E5\u770B\u5176\u4ED6\u8BCD\u5178\uFF5E`
-    });
-  }
-};
-var cache = new Cache();
-var INSTALL = "__INSTALLED";
-var buryPoint = (eventName) => {
-  api.$http.post({
-    url: "https://api.mixpanel.com/track?verbose=1&%69%70=1",
-    header: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: {
-      data: JSON.stringify([
-        {
-          event: eventName,
-          properties: {
-            token: "756388d6385bd7d3b849b18e4016c84a",
-            identifier: api.$info.identifier,
-            version: api.$info.version
-          }
-        }
-      ])
-    }
-  }).finally(() => {
-    cache.set(INSTALL, api.$info.version);
-  });
-};
 function supportLanguages() {
   if (!cache.get(INSTALL)) {
     buryPoint("plugin-installed");

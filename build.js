@@ -30,7 +30,7 @@ const initAppcast = () => {
     version,
     desc: `更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases`,
     sha256: hex,
-    url: `https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/dist/${PLUGIN_NAME}`,
+    url: `https://cdn.jsdelivr.net/gh/yaobinbin333/bob-plugin-cambridge-dictionary@main/release/${PLUGIN_NAME}`,
     minBobVersion: INFO_JSON.minBobVersion,
   };
   let appcastPath = path.resolve(__dirname, "./appcast.json");
