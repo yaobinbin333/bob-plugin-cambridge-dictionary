@@ -32,7 +32,23 @@ function translate(query, completion) {
         }
     });
 }
-
+const addMap = (map: Map<string, string[]>, key: string ,value: string) => {
+    if (map.has(key)) {
+        map.get(key)?.push(value);
+    }else {
+        map.set(key, [value]);
+    }
+}
+const mapToParts = (map: Map<string, string[]>) => {
+    const parts: Part[] = [];
+    map.forEach((value, key) => {
+        parts.push({
+            part: key,
+            means: value
+        })
+    })
+    return parts;
+}
 const main = (file: any, completion) => {
     const pushPart = (parts, part, ...means) => {
         if (means) {
@@ -47,8 +63,7 @@ const main = (file: any, completion) => {
     const hasWord = $('.headword').html();
     Bob.api.$log.info(`word: ${word}`);
     let phonetics: Phonetic[] = []
-    let cnAllExplanation: string[] = [];
-
+    const partMap = new Map<string, string[]>();
     if (hasWord) {
         phonetics = [makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk'), makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us')];
         // 英文释义、中文释义、例句
@@ -66,7 +81,7 @@ const main = (file: any, completion) => {
                     const cnExplanation = $('.ddef_b', element).children().first().text();
                     pushPart(parts, `${curPartSpeech}-英文释义`, enExplanation);
                     pushPart(parts, `${curPartSpeech}-中文释义`, cnExplanation);
-                    cnAllExplanation.push(`${curPartSpeech}: ${cnExplanation}`);
+                    addMap(partMap, curPartSpeech, cnExplanation);
                     let exampleCnt = 0;
                     let shouldPushEg = true;
                     $('.examp', element).each((index, element) => {
@@ -94,12 +109,8 @@ const main = (file: any, completion) => {
             toDict: {
                 phonetics,
                 additions: transformToAdditions(parts), // 把词义转化为additions结构增加可读性
-                parts: [{
-                    part: `${word}:`,
-                    means: [
-                        cnAllExplanation.join('\r')
-                    ]
-                }]
+                parts: mapToParts(partMap),
+                word: word
             },
             raw: '',
             toParagraphs: [ word ],

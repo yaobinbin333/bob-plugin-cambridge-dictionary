@@ -17927,6 +17927,23 @@ function translate(query, completion) {
     }
   });
 }
+var addMap = (map2, key, value) => {
+  if (map2.has(key)) {
+    map2.get(key)?.push(value);
+  } else {
+    map2.set(key, [value]);
+  }
+};
+var mapToParts = (map2) => {
+  const parts = [];
+  map2.forEach((value, key) => {
+    parts.push({
+      part: key,
+      means: value
+    });
+  });
+  return parts;
+};
 var main = (file, completion) => {
   const pushPart = (parts, part, ...means) => {
     if (means) {
@@ -17941,7 +17958,7 @@ var main = (file, completion) => {
   const hasWord = $2(".headword").html();
   api.$log.info(`word: ${word}`);
   let phonetics = [];
-  let cnAllExplanation = [];
+  const partMap = /* @__PURE__ */ new Map();
   if (hasWord) {
     phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
     api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
@@ -17956,7 +17973,7 @@ var main = (file, completion) => {
           const cnExplanation = $2(".ddef_b", element2).children().first().text();
           pushPart(parts, `${curPartSpeech}-\u82F1\u6587\u91CA\u4E49`, enExplanation);
           pushPart(parts, `${curPartSpeech}-\u4E2D\u6587\u91CA\u4E49`, cnExplanation);
-          cnAllExplanation.push(`${curPartSpeech}: ${cnExplanation}`);
+          addMap(partMap, curPartSpeech, cnExplanation);
           let exampleCnt = 0;
           let shouldPushEg = true;
           $2(".examp", element2).each((index4, element3) => {
@@ -17985,12 +18002,8 @@ ${cnExample}`);
       toDict: {
         phonetics,
         additions: transformToAdditions(parts),
-        parts: [{
-          part: `${word}:`,
-          means: [
-            cnAllExplanation.join("\r")
-          ]
-        }]
+        parts: mapToParts(partMap),
+        word
       },
       raw: "",
       toParagraphs: [word]
