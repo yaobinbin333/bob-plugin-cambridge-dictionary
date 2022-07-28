@@ -17937,11 +17937,11 @@ var main = (file, completion) => {
     }
   };
   const $2 = load(file);
-  const word = $2(".headword .dhw").text();
+  const word = $2(".headword .dhw").first().text();
   const hasWord = $2(".headword").html();
   api.$log.info(`word: ${word}`);
   let phonetics = [];
-  let cnAllExplanation = ["\u6240\u6709\u7FFB\u8BD1:"];
+  let cnAllExplanation = [];
   if (hasWord) {
     phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
     api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
@@ -17984,12 +17984,16 @@ ${cnExample}`);
       ],
       toDict: {
         phonetics,
-        additions: transformToAdditions(parts)
+        additions: transformToAdditions(parts),
+        parts: [{
+          part: `${word}:`,
+          means: [
+            cnAllExplanation.join("\r")
+          ]
+        }]
       },
       raw: "",
-      toParagraphs: [
-        cnAllExplanation.join("\r")
-      ]
+      toParagraphs: [word]
     };
     completion({
       result: res

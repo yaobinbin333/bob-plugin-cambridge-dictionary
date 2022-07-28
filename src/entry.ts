@@ -43,11 +43,11 @@ const main = (file: any, completion) => {
         }
       }
     const $ = load(file);
-    const word = $('.headword .dhw').text();
+    const word = $('.headword .dhw').first().text();
     const hasWord = $('.headword').html();
     Bob.api.$log.info(`word: ${word}`);
     let phonetics: Phonetic[] = []
-    let cnAllExplanation: string[] = ['所有翻译:'];
+    let cnAllExplanation: string[] = [];
 
     if (hasWord) {
         phonetics = [makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk'), makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us')];
@@ -93,12 +93,16 @@ const main = (file: any, completion) => {
             ],
             toDict: {
                 phonetics,
-                additions: transformToAdditions(parts)
+                additions: transformToAdditions(parts), // 把词义转化为additions结构增加可读性
+                parts: [{
+                    part: `${word}:`,
+                    means: [
+                        cnAllExplanation.join('\r')
+                    ]
+                }]
             },
             raw: '',
-            toParagraphs: [
-                cnAllExplanation.join('\r')
-            ],
+            toParagraphs: [ word ],
         }
         completion({
             result: res
