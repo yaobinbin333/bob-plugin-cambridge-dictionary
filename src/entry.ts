@@ -59,7 +59,7 @@ const main = (file: any, completion) => {
         }
       }
     const $ = load(file);
-    const word = $('.headword .dhw').first().text();
+    const word = $('.headword').first().text();
     const hasWord = $('.headword').html();
     Bob.api.$log.info(`word: ${word}`);
     let phonetics: Phonetic[] = []

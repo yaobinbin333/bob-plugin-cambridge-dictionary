@@ -17954,7 +17954,7 @@ var main = (file, completion) => {
     }
   };
   const $2 = load(file);
-  const word = $2(".headword .dhw").first().text();
+  const word = $2(".headword").first().text();
   const hasWord = $2(".headword").html();
   api.$log.info(`word: ${word}`);
   let phonetics = [];
