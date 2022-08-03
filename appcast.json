@@ -21,6 +21,13 @@
       "sha256": "c50ebda9b413291133e3dbd131c469b0d2ce501722dd5b1988a6c4705a861c6d",
       "url": "https://cdn.jsdelivr.net/gh/yaobinbin333/bob-plugin-cambridge-dictionary@main/release/bob-plugin-cambridge-dictionary1.0.3.bobplugin",
       "minBobVersion": "0.8.0"
+    },
+    {
+      "version": "1.0.4",
+      "desc": "更新内容见: https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases",
+      "sha256": "e2293d1cb91c57ad49c92702a2380cf05ded2db7e760227f9696ff6d1eb9550f",
+      "url": "https://cdn.jsdelivr.net/gh/yaobinbin333/bob-plugin-cambridge-dictionary@main/release/bob-plugin-cambridge-dictionary1.0.4.bobplugin",
+      "minBobVersion": "0.8.0"
     }
   ]
 }

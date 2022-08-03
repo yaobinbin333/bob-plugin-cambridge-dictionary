@@ -17,7 +17,9 @@ const baseUrl = 'https://dictionary.cambridge.org';
 function translate(query, completion) {
     if (query.detectFrom !== 'en' || !query.text || query.text.split(" ").length > 3) {
         completion({
-            error: '本词典只支持英语单词翻译'
+            error: {
+                type: 'notFound',
+            }
         });
         return;
     }
@@ -65,7 +67,7 @@ const main = (file: any, completion) => {
     let phonetics: Phonetic[] = []
     const partMap = new Map<string, string[]>();
     if (hasWord) {
-        phonetics = [makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk'), makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us')];
+        phonetics = [makePhonetic($('.us .pron .ipa'), $('.us [type="audio/mpeg"]'), 'us'), makePhonetic($('.uk .pron .ipa'), $('.uk [type="audio/mpeg"]'), 'uk')];
         // 英文释义、中文释义、例句
         Bob.api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
         const parts: any[] = [];
@@ -122,7 +124,9 @@ const main = (file: any, completion) => {
 
     }else {
         completion({
-            error: `词典内没有找到${word}，请查看其他词典～`
+            error: {
+                type: 'notFound',
+            }
         });
     }
 }

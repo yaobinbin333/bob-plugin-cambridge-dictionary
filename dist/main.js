@@ -17912,7 +17912,9 @@ var baseUrl = "https://dictionary.cambridge.org";
 function translate(query, completion) {
   if (query.detectFrom !== "en" || !query.text || query.text.split(" ").length > 3) {
     completion({
-      error: "\u672C\u8BCD\u5178\u53EA\u652F\u6301\u82F1\u8BED\u5355\u8BCD\u7FFB\u8BD1"
+      error: {
+        type: "notFound"
+      }
     });
     return;
   }
@@ -17960,7 +17962,7 @@ var main = (file, completion) => {
   let phonetics = [];
   const partMap = /* @__PURE__ */ new Map();
   if (hasWord) {
-    phonetics = [makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk"), makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us")];
+    phonetics = [makePhonetic($2(".us .pron .ipa"), $2('.us [type="audio/mpeg"]'), "us"), makePhonetic($2(".uk .pron .ipa"), $2('.uk [type="audio/mpeg"]'), "uk")];
     api.$log.info(`phonetics${JSON.stringify(phonetics)}`);
     const parts = [];
     const explanationCnt = $2(".entry-body__el").length;
@@ -18014,7 +18016,9 @@ ${cnExample}`);
     api.$log.info(`res${res}`);
   } else {
     completion({
-      error: `\u8BCD\u5178\u5185\u6CA1\u6709\u627E\u5230${word}\uFF0C\u8BF7\u67E5\u770B\u5176\u4ED6\u8BCD\u5178\uFF5E`
+      error: {
+        type: "notFound"
+      }
     });
   }
 };
