@@ -1,6 +1,7 @@
 <p align="center">
 <a href="https://github.com/yaobinbin333/bob-plugin-cambridge-dictionary/releases"><img src="https://img.shields.io/github/downloads/yaobinbin333/bob-plugin-cambridge-dictionary/total.svg" alt="release downloads"></a>
 </p>
+
 # bob-plugin-cambridge-dictionary
 bob-plugin剑桥词典翻译插件
 文本翻译插件，只针对英文转中文
